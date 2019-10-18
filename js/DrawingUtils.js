@@ -1,4 +1,12 @@
 /*---------------------------------
+ * Pivot do desenho
+*/
+drawMode = 
+{
+	TOP_LEFT: 0,
+	CENTER:   1
+};
+/*---------------------------------
  * LIMPA O CANVAS
 */
 function clearCanvas(){
@@ -8,26 +16,68 @@ function clearCanvas(){
  * UMA LINHA
  * de start = {x:,y:} a finish = {x:,y:}
 */
-function drawLine(start,finish){
+function drawLine(xA,yA,xB,yB){
 	context.beginPath();
-	context.moveTo(start.x,start.y);
-	context.lineTo(finish.x,finish.y);
+	context.moveTo(xA,yA);
+	context.lineTo(xB,yB);
 	context.stroke();
 	context.closePath();
+}
+/*---------------------------------
+ * DESENHA UM RETANGULO
+ * de tamanho w por h, em x e y
+*/
+function fillRectangle(x,y,w,h,rectMode){
+	if(rectMode == drawMode.CENTER)
+	{
+		context.fillRect(x-w/2,y-h/2,w,h);
+	}
+	else
+	{
+		context.fillRect(x,y,w,h);
+	}
+}
+function strokeRectangle(x,y,w,h,rectMode){
+	if(rectMode == drawMode.CENTER)
+	{
+		context.strokeRect(x-w/2,y-h/2,w,h);
+	}
+	else
+	{
+		context.strokeRect(x,y,w,h);
+	}
 }
 /*---------------------------------
  * DESENHA UM CIRCULO
  * de raio r, em x e y
 */
-function fillCircle(x,y,r){
+function fillCircle(x,y,r,circleMode){
 	context.beginPath();
-	context.arc(x,y,r,0,Math.PI*2);
+	
+	if(circleMode == drawMode.TOP_LEFT)
+	{
+		context.arc(x+r,y+r,r,0,Math.PI*2);
+	}
+	else
+	{
+		context.arc(x,y,r,0,Math.PI*2);
+	}
+	
 	context.fill();
 	context.closePath();
 }
 function strokeCircle(x,y,r){
 	context.beginPath();
-	context.arc(x,y,r,0,Math.PI*2);
+	
+	if(circleMode == drawMode.TOP_LEFT)
+	{
+		context.arc(x+r,y+r,r,0,Math.PI*2);
+	}
+	else
+	{
+		context.arc(x,y,r,0,Math.PI*2);
+	}
+	
 	context.stroke();
 	context.closePath();
 }
