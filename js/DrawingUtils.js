@@ -13,6 +13,21 @@ function clearCanvas(){
 	context.clearRect(0,0,width,height);
 }
 /*---------------------------------
+ * FILL THE CANVAS WITH A COLOR color
+*/
+function fillCanvas(color)
+{
+	let save = context.fillStyle;
+	
+	if(color != undefined)
+	{
+		context.fillStyle = color.getString();
+	}	
+	fillRectangle(0,0,width,height);
+
+	context.fillStyle = save;
+}
+/*---------------------------------
  * UMA LINHA
  * de start = {x:,y:} a finish = {x:,y:}
 */

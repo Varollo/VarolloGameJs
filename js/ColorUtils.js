@@ -7,7 +7,14 @@ class Color
         this.r = r;
         this.g = g;
         this.b = b;
-        this.a = a;
+        if(a === undefined)
+        {
+            this.a = 1;
+        }
+        else
+        {
+            this.a = a;
+        }
     }
 
     getString()

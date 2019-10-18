@@ -1,25 +1,19 @@
-function load()
-{
-    // used to load files
-}
-
 function setup()
 {
-    // called once
+    player = {x:10, y:height/2, speed: 100};
 }
 
 function update(deltaTime)
 {
-    // called once per frame
+	if(keys.ANY_KEY.pressed)
+	{
+		player.x += deltaTime * player.speed;
+	}
 }
 
 function draw()
 {
-    // called once per frame, after update
-	fillCircle(width/2,height/2,25,drawMode.CENTER);
-	strokeRectangle(width/2,height/2,50,50,drawMode.TOP_LEFT);
-	
-	context.strokeStyle = "green";
-	drawLine(width/2,0,width/2,height);
-	drawLine(0,height/2,width,height/2);
+	fillCanvas(new Color(200,128,0));
+
+	fillCircle(player.x,player.y,10,drawMode.CENTER);
 }
