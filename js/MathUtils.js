@@ -6,14 +6,18 @@ function lerp (start, end, amt){
     return (1-amt)*start+amt*end;
 }
 function clamp (value, min, max){
+	if(min === 0 && max === 0)
+	{
+		min = 0;
+		max = 1;
+	}
     if(value > max) return max;
     else if(value < min) return min;
     else return value;
 }
-function clamp (value){
-    if(value > 1) return 1;
-    else if(value < 0) return 0;
-    else return value;
+function distance(xA,yA,xB,yB)
+{
+	return Math.sqrt((xA - xB) * (xA - xB) + (yA - yB) * (yA - yB));
 }
 /*---------------------------------
  * VETOR

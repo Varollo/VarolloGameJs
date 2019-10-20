@@ -28,6 +28,11 @@
     {
         // called once per frame, after update
     }
+
+    function onPauseGame()
+    {
+        // called once per frame while the game is paused
+    }
 */
 
 window.onload = function()
@@ -40,12 +45,16 @@ window.onload = function()
     context = canvas.getContext('2d');    
 
     width = canvas.width;
-	height = canvas.height;	
+    height = canvas.height;	
+    centerX = width/2;
+    centerY = height/2;
+
+    gamePaused = false;
 	
     if (typeof setup === "function") { 
 		setup();
 	}
-    
+
     let date = new Date();
     gameLoop(date.getTime());
 }
@@ -64,8 +73,46 @@ function gameLoop(startTime)
 	if (typeof draw === "function") { 
 		draw();
 	}
+        requestAnimationFrame(function(){
+            if(gamePaused)
+            {
+                gameStop();
+            }
+            else
+            {
+                gameLoop(newTime);
+            }
+        });
+}
 
-    requestAnimationFrame(function(){
-        gameLoop(newTime);
-    });
+function gameStop()
+{
+    if (typeof onPauseGame === "function") { 
+		onPauseGame();
+    }
+    
+        requestAnimationFrame(function(){
+            if(gamePaused)
+            {
+                gameStop();
+            }
+            else
+            {
+                gameLoop(newTime);
+            }
+        });
+}
+
+function setCanvasWidth(w)
+{
+    canvas.width = w;
+    width = w;
+    centerX = width/2;
+}
+
+function setCanvasHeight(h)
+{
+    canvas.height = h;
+    height = h;
+    centerY = height/2;
 }

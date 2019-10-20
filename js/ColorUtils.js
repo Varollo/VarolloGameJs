@@ -63,3 +63,9 @@ function colorToString(color)
 {
     return colorMode+"("+color.r+","+color.g+","+color.b+","+color.a+")";
 }
+
+const colors = 
+{
+    BLACK: new Color(0,0,0),
+    GRAY: new Color(127,127,127)
+};
