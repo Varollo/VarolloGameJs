@@ -19,46 +19,191 @@ function distance(xA,yA,xB,yB)
 {
 	return Math.sqrt((xA - xB) * (xA - xB) + (yA - yB) * (yA - yB));
 }
+function pointInRectangle(pX,pY,rX,rY,rW,rH)
+{
+    return (pX >= rX && pY >= rY && pX <= rX + rW && pY <= rY + rH);
+}
+
+function pointInCircle(pX,pY,cX,cY,cR)
+{
+    return (distance(pX,pY, cX,cY) <= cR);
+}
 /*---------------------------------
  * VETOR
  * módulo, direção e sentido
 */
-function Vector(x,y){
-	this.x = x || 0;
-	this.y = y || 0;
+class Vector
+{
+	constructor(x,y)
+	{
+		this.x = x;
+		this.y = y;
+	}
+
+	addVec(v)
+	{
+		this.x += v.x;
+		this.y += v.y;
+	}
+
+	static sAddVec(v1,v2){
+		return new Vector(v1.x + v2.x, v1.y + v2.y);
+	}
+
+	/*add(c)
+	{
+		this.x += c;
+		this.y += c;
+	}	*/
+
+	static sAdd(v,c){
+		return new Vector(v.x + c, v.y + c);
+	}
+
+	subVec(v)
+	{
+		this.x -= v.x;
+		this.y -= v.y;
+	}
+
+	static sSubVec(v1, v2)
+	{
+		return new Vector(v1.x - v2.x, v1.y - v2.y);
+	}
+
+	sub(c)
+	{
+		this.x -= c;
+		this.y -= c;
+	}
+
+	static sSub(v, c)
+	{
+		return new Vector(v.x - c, v.y - c);
+	}	
+
+	cross(v)
+	{
+		let i = this.x * v.y;
+		let j = this.y * v.x;
+
+		return i - j;
+	}
+
+	static sCross(v1, v2)
+	{
+		let i = v1.x * v2.y;
+		let j = v1.y * v2.x;
+
+		return i - j;
+	}
+
+	dot(v)
+	{
+		let i = this.x * v.x;
+		let j = this.y * v.y;
+
+		return i + j;
+	}
+
+	static sDot(v1, v2)
+	{
+		let i = v1.x * v2.x;
+		let j = v1.y * v2.y;
+
+		return i + j;
+	}
+
+	mult(c)
+	{
+		this.x *= c;
+		this.y *= c;
+	}
+
+	static sMult(v, c)
+	{
+		return new Vector(v.x * c, v.y * c);
+	}
+
+	div(c)
+	{
+		this.x /= c;
+		this.y /= c;
+	}
+
+	static sDiv(v, c)
+	{
+		return new Vector(v.x / c, v.y / c);
+	}
+
+	static rotateVector(v, a)
+	{
+		let x = (v.x * Math.cos(a)) - (v.y * Math.sin(a));
+		let y = (v.x * Math.sin(a)) + (v.y * Math.cos(a));
+		
+		return new Vector(x,y);
+	}
+
+	static angleBetween(v1, v2)
+	{
+		let dot = this.sDot(v1, v2);
+		let mag1 = v1.mag();
+		let mag2 = v2.mag();
+		
+		return Math.acos(dot / (mag1 * mag2));
+	}
+
+	set(x,y){
+		this.x = x;
+		this.y = y;
+	}
+
+	mag(){
+		return Math.sqrt(this.x*this.x + this.y*this.y);
+	}
+
+	normalize(){
+		this.div(this.mag());
+	}
+
+	static sNormalized(v)
+	{
+		return this.sDiv(v,v.mag());
+	}
+
+	clone(){
+		return new Vector(this.x, this.y);
+	}
+
+	inverse(){
+		return new Vector(-this.x, -this.y);
+	}
+
+	static get zero(){
+		return new Vector(0,0);
+	}
+
+	static get right(){
+		return new Vector(1,0);
+	}
+
+	static get left(){
+		return new Vector(-1,0);
+	}
+
+	static get up(){
+		return new Vector(0,1);
+	}
+
+	static get down(){
+		return new Vector(0,-1);
+	}
+
+	static get one(){
+		return new Vector(1,1);
+	}
 }
-Vector.prototype.add = function(v){
-	this.x += v.x;
-	this.y += v.y;
-}
-Vector.prototype.sub = function(v){
-	this.x -= v.x;
-	this.y -= v.y;
-}
-Vector.prototype.mult = function(c){
-	this.x *= c;
-	this.y *= c;
-}
-Vector.prototype.div = function(c){
-	this.x /= c;
-	this.y /= c;
-}
-Vector.prototype.set = function(x,y){
-	this.x = x;
-	this.y = y;
-}
-Vector.prototype.mag = function(){
-	return Math.sqrt(this.x*this.x + this.y*this.y);
-}
-Vector.prototype.normalize = function(){
-	this.div(this.mag());
-}
-Vector.prototype.copy = function(){
-	return new Vector(this.x,this.y);
-}
-Vector.prototype.inverse = function(){
-	return new Vector(-this.x,-this.y);
-}
+
 /*---------------------------------
  * RETORNA UM NUMERO ALEATORIO
  * min, max
