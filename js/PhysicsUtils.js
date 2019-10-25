@@ -19,13 +19,15 @@ bodyStack = [];
 setInterval(physicsUpdate,FIXED_DELTA_TIME);
 function physicsUpdate(deltaTime)
 {
+    if(gamePaused) return;
+
     if(bodyStack != null)
     {
         let collisionPairs = [];
 
         bodyStack.forEach(body => {            
             
-            body.updateSelf(deltaTime);
+            
             if(body.collider != undefined)
             {
                 bodyStack.forEach(other => {
@@ -57,10 +59,8 @@ function physicsUpdate(deltaTime)
                     }
                 });
             }
-            if(body.affectedByGravity)
-            {
-                body.velocity.addVec(GRAVITY);
-            }
+
+            body.updateSelf(deltaTime);
         });
     }
 
@@ -91,17 +91,22 @@ class Body
 
     updateSelf(deltaTime)
     {
+        if(this.collider != undefined)
+        {
+            this.collider.position = this.position;
+        }
+
         if(this.isStatic) return;
+
+        if(this.affectedByGravity)
+        {
+            this.velocity.addVec(GRAVITY);
+        }
 
         this.velocity.addVec(this.acceleration);
         this.position.addVec(this.velocity);
 
         this.acceleration = Vector.zero;
-
-        if(this.collider != undefined)
-        {
-            this.collider.position = this.position;
-        }
     }
 
     addForce(f)
@@ -118,48 +123,6 @@ class Body
     {
         // called when colliding with something
         // (if it has a collider) 
-
-        let m1 = this.mass;
-        let m2 = other.mass;
-
-        let sumMasses = m1 + m2;
-
-        let v1 = this.velocity;
-        let v2 = other.velocity;
-
-        let x1 = this.position;
-        let x2 = other.position;
-
-        if(!this.isKinematic)
-        {
-            let dis = Vector.sSubVec(x1,x2);
-            let dif = Vector.sSubVec(v1,v2);
-
-            let a = (2 * m2) / sumMasses;
-            let b = Vector.sDot(dif, dis);
-            let c = Math.pow(dis.mag(),2);
-            let d = a*(b/c);
-            
-            let u1 = Vector.sSubVec(v1, Vector.sMult(dis, d));
-
-            this.velocity = Vector.sMult(u1, this.bounciness);
-        }
-
-        if(!other.isKinematic)
-        {
-            let dis = Vector.sSubVec(x2,x1);
-            let dif = Vector.sSubVec(v2,v1);
-    
-            let a = (2 * m1) / sumMasses;
-            let b = Vector.sDot(dif, dis);
-            let c = Math.pow(dis.mag(),2);
-            let d = a*(b/c);
-            
-            let u2 = Vector.sSubVec(v2, Vector.sMult(dis, d));
-
-            other.velocity = Vector.sMult(u2, other.bounciness);
-        }  
-
     }
 }
 

@@ -131,6 +131,11 @@ class Vector
 		this.y /= c;
 	}
 
+	getAngleRad()
+	{
+		return Math.atan2(this.y, this.x);
+	}
+
 	static sDiv(v, c)
 	{
 		return new Vector(v.x / c, v.y / c);
@@ -147,8 +152,14 @@ class Vector
 	static angleBetween(v1, v2)
 	{
 		let dot = this.sDot(v1, v2);
+
 		let mag1 = v1.mag();
 		let mag2 = v2.mag();
+
+		if(mag1 * mag2 == 0)
+		{
+			return Math.acos(dot);
+		}
 		
 		return Math.acos(dot / (mag1 * mag2));
 	}

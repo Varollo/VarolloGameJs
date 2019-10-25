@@ -1,170 +1,151 @@
 function setup()
 {
-	// called once
-	setCanvasWidth(800);
-	setCanvasHeight(600);
-
-	player = new Block(centerX, height-50, 100, 30);
-	ball = new Ball(centerX, centerY, 20);
-
-	//player.setCollider(new RectCollider(player.position.x, player.position.y, player.w, player.h));
-	player.setCollider(new CircleCollider(player.x,player.y,player.w));
-	//ball.setCollider(new RectCollider(ball.position.x, ball.position.y, ball.r*2, ball.r*2));
-	ball.setCollider(new CircleCollider(ball.x,ball.y,ball.r));
-	
+	// called once at the begining of the game
+	setCanvasSize(800,600);
 	score = 0;
+
+	player = new Player(centerX - 100, height - 100, 200, 35);
+
+	ball = new Block(centerX - 17, centerY - 17, 35, 35);
 }
 
 function draw()
 {
-	// called once per frame, after update
-
-	// drawing the background
+	// called once every frame after update
 	fillCanvas(colors.BLACK);
-
-	context.font = "100px Arial";
-	context.fillText(score.toString(),centerX-25,100);
-
-	context.fillStyle = colors.GRAY.getString();
-	context.font = "50px Arial";
-	context.fillText(window.name,centerX-10,150);
-
-	// drawing the player
-	player.drawSelf();
-
-	// drawing the ball
 	ball.drawSelf();
+	player.drawSelf();
+	context.font='50px verdana';
+	context.fillStyle = colors.WHITE.getString();	
+	context.fillText(score.toString(), centerX, 100);
+
+}
+
+function update(deltaTime)
+{
+	if(keys.LEFT_ARROW.pressed)
+	{
+		player.addForce(Vector.left);
+	}
+	else if(keys.RIGHT_ARROW.pressed)
+	{
+		player.addForce(Vector.right);
+	}
 }
 
 function onPauseGame()
 {
-	// called once per frame while the game is paused
+	fillCanvas(colors.BLACK);
+	context.font='50px verdana';
+	context.fillStyle = colors.WHITE.getString();
+	context.fillText(score.toString(), centerX, 100);
+	context.fillText("You lost", centerX-100, centerY+10);
+
+	context.font='25px verdana';
+	context.fillStyle = colors.GRAY.getString();
+	context.fillText("Press SPACE to restart", centerX-140, centerY+50);
+
 	if(keys.SPACE.pressed)
 	{
 		location.reload();
 	}
+	
 }
 
 class Block extends Body
 {
 	constructor(x,y,w,h)
 	{
-		super()
-		this.affectedByGravity = false;
-		this.isKinematic = true;
+		super();
 
-		this.mass = 10;
+		this.position.x = x;
+		this.position.y = y;
 
-		this.position = new Vector(x,y);
 		this.w = w;
 		this.h = h;
 
-		this.speed = 2;
+		this.setCollider(new RectCollider(this.position.x, this.position.y, this.w, this.h));
+	}
+
+	drawSelf()
+	{
+		context.fillStyle = "#FFFFFF";
+
+		fillRectangle(this.position.x, this.position.y,
+					  this.w, this.h, drawMode.TOP_LEFT);
 	}
 
 	updateSelf(deltaTime)
 	{
 		super.updateSelf(deltaTime);
 
-		if(keys.RIGHT_ARROW.pressed)
-		{
-			this.addForce(new Vector(this.speed,0));
-		}
-		else if(keys.LEFT_ARROW.pressed)
-		{
-			this.addForce(new Vector(-this.speed,0));
-		}
-		if(keys.UP_ARROW.pressed)
-		{
-			this.addForce(new Vector(0,-this.speed));
-		}
-		else if(keys.DOWN_ARROW.pressed)
-		{
-			this.addForce(new Vector(0,this.speed));
-		}
+		this.velocity.x *= 0.99;
 
-		this.velocity.mult(0.9);
+		this.checkEdges();
 	}
 
-	drawSelf()
-	{
-		context.fillStyle = "white";
-		//sfillRectangle(this.position.x,this.position.y,this.w,this.h,drawMode.TOP_LEFT);
-		fillCircle(this.position.x,this.position.y,this.w,drawMode.CENTER);
-	}
-}
-
-class Ball extends Body
-{
-	constructor(x,y,r)
-	{
-		super();
-		this.position = new Vector(x,y);
-		this.r = r;
-		this.friction = 1;
-
-		this.bounciness = 1;
-
-		this.affectedByGravity = false;
-
-		//this.velocity = new Vector(random(-1,1), 1);
-		//this.velocity.mult(10);
-	}
-
-	updateSelf(deltaTime)
-	{
-		super.updateSelf(deltaTime);
-
-		if(this.position.x - this.r <= 0)
-		{
-			this.position.x = this.r;
-			this.velocity.x *= -0.9;
-		}
-		else if (this.position.x + this.r >= width)
-		{
-			this.position.x = width-this.r;
-			this.velocity.x *= -0.9;
-		}
-
-		if(this.position.y - this.r <= 0)
-		{
-			this.position.y = this.r;
-			this.velocity.y *= -0.9;
-		}
-		else if(this.position.y - 2*this.r >= height)
-		{
-			loseGame();
-		}
-
-		this.velocity.x *= 0.999;
-	}
-
-	drawSelf()
-	{
-		//fillRectangle(this.position.x,this.position.y,this.r*2,this.r*2,drawMode.TOP_LEFT);
-		fillCircle(this.position.x,this.position.y,this.r,drawMode.CENTER);
-	}
-	
 	onCollision(other)
 	{
-		super.onCollision(other);
-		
-		/*		
-		let side = -(other.position.x + other.w/2 - this.position.x);
-		this.velocity.y = 0;
-		this.addForce(new Vector(side/5 + random(1,1),-25));
-		*/
+		let side = other.position.x + other.w/2 > this.position.x + this.w /2 ? -1 : 1;
+
+		other.velocity = other.velocity.inverse();
+		other.position.addVec(other.velocity);
+
+		other.velocity.x += side * 2;
+
+		other.velocity.x *= 1.7;
+		other.velocity.y *= 1.01;
 
 		score++;
 	}
+
+	checkEdges()
+	{
+		if(this.position.x < 0)
+		{
+			this.position.x = 0;
+			this.velocity.x *= -1;
+		}
+		else if(this.position.x > width - this.w)
+		{
+			this.position.x = width - this.w;
+			this.velocity.x *= -1;
+		}
+
+		if(this.position.y < 0)
+		{
+			this.position.y = 0;
+			this.velocity.y *= -1;
+		}
+		else if(this.position.y > height + this.h)
+		{
+			gamePaused = true;
+		}
+
+	}
 }
 
-function loseGame() {
-	gamePaused = true;
+class Player extends Block
+{
+	constructor(x,y,w,h)
+	{
+		super(x,y,w,h);
 
-	context.font = "50px Arial";
-	context.fillText("press SPACE to retry", 155, centerY);
-	
-	if (window.name < score)
-		window.name = score;
+		this.affectedByGravity = false;
+		this.isKinematic = true;
+	}
+
+	checkEdges()
+	{
+		if(this.position.x < 0)
+		{
+			this.position.x = 0;
+			this.velocity.x = 0;
+		}
+		else if(this.position.x > width - this.w)
+		{
+			this.position.x = width - this.w;
+			this.velocity.x = 0;
+		}
+	}
 }

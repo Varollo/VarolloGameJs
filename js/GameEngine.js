@@ -103,6 +103,17 @@ function gameStop()
         });
 }
 
+function setCanvasSize(w,h)
+{
+    canvas.width = w;
+    width = w;
+    centerX = width/2;
+
+    canvas.height = h;
+    height = h;
+    centerY = height/2;
+}
+
 function setCanvasWidth(w)
 {
     canvas.width = w;
