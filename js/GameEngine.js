@@ -68,21 +68,22 @@ function gameLoop(startTime)
 
 	if (typeof update === "function") { 
 		update(deltaTime/1000);
-	}
+    }
 
 	if (typeof draw === "function") { 
 		draw();
-	}
-        requestAnimationFrame(function(){
-            if(gamePaused)
-            {
-                gameStop();
-            }
-            else
-            {
-                gameLoop(newTime);
-            }
-        });
+    }
+    
+    requestAnimationFrame(function(){
+        if(gamePaused)
+        {
+            gameStop();
+        }
+        else
+        {
+            gameLoop(newTime);
+        }
+    });
 }
 
 function gameStop()

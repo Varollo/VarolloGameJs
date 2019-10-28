@@ -5,20 +5,26 @@ function setup()
 	score = 0;
 
 	player = new Player(centerX - 100, height - 100, 200, 35);
-
 	ball = new Block(centerX - 17, centerY - 17, 35, 35);
+	
+	SetAntiAliasing(false);
+	background_Sprite = new Sprite("img/montain.png", {x: 0, y: 0}, {x:width, y: height});
 }
 
 function draw()
 {
 	// called once every frame after update
-	fillCanvas(colors.BLACK);
+	//fillCanvas(colors.BLACK);
+	background_Sprite.drawSelf();
+
 	ball.drawSelf();
 	player.drawSelf();
+	
 	context.font='50px verdana';
 	context.fillStyle = colors.WHITE.getString();	
 	context.fillText(score.toString(), centerX, 100);
 
+	
 }
 
 function update(deltaTime)
@@ -61,10 +67,9 @@ class Block extends Body
 		this.position.x = x;
 		this.position.y = y;
 
-		this.w = w;
-		this.h = h;
+		this.scale = new Vector(w,h);
 
-		this.setCollider(new RectCollider(this.position.x, this.position.y, this.w, this.h));
+		this.setCollider(new RectCollider(this.position.x, this.position.y, this.scale.x, this.scale.y));
 	}
 
 	drawSelf()
@@ -72,7 +77,7 @@ class Block extends Body
 		context.fillStyle = "#FFFFFF";
 
 		fillRectangle(this.position.x, this.position.y,
-					  this.w, this.h, drawMode.TOP_LEFT);
+					  this.scale.x, this.scale.y, drawMode.TOP_LEFT);
 	}
 
 	updateSelf(deltaTime)
@@ -86,7 +91,7 @@ class Block extends Body
 
 	onCollision(other)
 	{
-		let side = other.position.x + other.w/2 > this.position.x + this.w /2 ? -1 : 1;
+		let side = other.position.x + other.scale.x/2 > this.position.x + this.scale.x /2 ? -1 : 1;
 
 		other.velocity = other.velocity.inverse();
 		other.position.addVec(other.velocity);
@@ -106,9 +111,9 @@ class Block extends Body
 			this.position.x = 0;
 			this.velocity.x *= -1;
 		}
-		else if(this.position.x > width - this.w)
+		else if(this.position.x > width - this.scale.x)
 		{
-			this.position.x = width - this.w;
+			this.position.x = width - this.scale.x;
 			this.velocity.x *= -1;
 		}
 
@@ -117,7 +122,7 @@ class Block extends Body
 			this.position.y = 0;
 			this.velocity.y *= -1;
 		}
-		else if(this.position.y > height + this.h)
+		else if(this.position.y > height + this.scale.y)
 		{
 			gamePaused = true;
 		}
@@ -142,9 +147,9 @@ class Player extends Block
 			this.position.x = 0;
 			this.velocity.x = 0;
 		}
-		else if(this.position.x > width - this.w)
+		else if(this.position.x > width - this.scale.x)
 		{
-			this.position.x = width - this.w;
+			this.position.x = width - this.scale.x;
 			this.velocity.x = 0;
 		}
 	}
