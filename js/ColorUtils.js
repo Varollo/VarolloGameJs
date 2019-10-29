@@ -78,5 +78,6 @@ const colors =
 {
     WHITE: new Color(255,255,255),
     BLACK: new Color(0,0,0),
-    GRAY: new Color(127,127,127)
+    GRAY: new Color(127,127,127),
+    RED: new Color(255,0,0),
 };

@@ -1,4 +1,4 @@
-const FLOOR_LEVEL = 500;
+const FLOOR_LEVEL = 400;
 let score = 0;
 let gameSpeed = 10;
 
@@ -7,38 +7,60 @@ function load()
     // used to load objects
     character_tex = new Texture("img/example 02/character_spritesheet.png");
     obstacles_tex = new Texture("img/example 02/forest_enemies_spritesheet.png");
+    background_tex = new Texture("img/example 02/forest_background .png");
 }
 
 function setup()
 {
     // called once
-    setCanvasSize(800, 600);
-
+    setCanvasSize(500, 500);
+    setAntiAliasing(false);
     GRAVITY = new Vector(0,3);
 
-    setAntiAliasing(false);
+    // defining the background
+    let bg_layer_0 = new Sprite(background_tex, Vector.zero, new Vector(width, height));
+        bg_layer_0.setClippingValues(200,0,100,100);
+
+    let bg_layer_1 = new Sprite(background_tex, Vector.zero, new Vector(width, height));
+        bg_layer_1.setClippingValues(100,0,100,100);
+
+    let bg_layer_2 = new Sprite(background_tex, Vector.zero, new Vector(width, height));
+        bg_layer_2.setClippingValues(0,0,100,100);
+    
+    background = new Parallax
+    ([
+            new ParallaxLayer(bg_layer_0, new Vector(-1,0)),
+            new ParallaxLayer(bg_layer_1, new Vector(-3,0)),
+            new ParallaxLayer(bg_layer_2, new Vector(-8,0))
+    ]);
 
     // defining the player
     player = new Player(100, 400, 50, 80);
     player.sprite = new Array(2);
+
     player.sprite[0] = new Sprite(character_tex,player.position,player.size);
     player.sprite[0].setClippingValues(0,0,10,16);
+
     player.sprite[1] = new Sprite(character_tex,player.position,player.size);
     player.sprite[1].setClippingValues(15,0,10,16);
     
     // defining the obstacle
     obstacle = new Obstacle(width,450, 55, 80);
     obstacle.sprite = new Array(2);
+
     obstacle.sprite[0] = new Sprite(obstacles_tex,obstacle.position, obstacle.size);
     obstacle.sprite[0].setClippingValues(0,0,11,16);
+
     obstacle.sprite[1] = new Sprite(obstacles_tex,obstacle.position, obstacle.size);
     obstacle.sprite[1].setClippingValues(16,0,11,16);
 
     // defining the flying obstacle
-    obstacle2 = new Obstacle(width+1000,349,60, 15);
+    obstacle2 = new Obstacle(width+1000,FLOOR_LEVEL-141,60, 15);
     obstacle2.sprite = new Array(1);
+
     obstacle2.sprite[0] = new Sprite(obstacles_tex,obstacle2.position, obstacle2.size);
     obstacle2.sprite[0].setClippingValues(32,0,12,3);
+
     obstacle2.affectedByGravity = false;
 }
 
@@ -55,7 +77,7 @@ function update(deltaTime)
 function draw()
 {
     // called once per frame, after update
-    drawBackground();
+    background.drawLayers();
 
     // drawing the player
     player.drawSelf();
@@ -67,15 +89,30 @@ function draw()
     drawScore();
 }
 
+let countValue = 0;
 function onPauseGame()
 {
-    context.font='50px verdana';
-	setFillColor(colors.WHITE);	
-    context.fillText("PRESS [SPACE] TO RETRY", 75, centerY);
-    
+    if(countValue < 7)
+    {
+        fillCanvas(new Color(0,0,0,0.1));
+
+        setFillColor(new Color(0,0,0,0.075))
+        fillRectangle(0,200,width,100);        
+
+        context.font='30px Arial Black';
+        setFillColor(colors.RED);
+        context.fillText("YOU DIED", 175, centerY-15);
+
+        context.font='15px Arial';
+        setFillColor(colors.GRAY);	
+        context.fillText("PRESS [SPACE] TO RETRY", 160, centerY+25);
+
+        countValue++;
+    }    
+
     if(keys.SPACE.pressed)
     {
-        location.reload();
+        location.reload();        
     }
 }
 
@@ -90,16 +127,9 @@ function keyPressed(key)
 
 function drawScore()
 {
-    context.font='50px verdana';
-	setFillColor(colors.GRAY);	
-	context.fillText(score.toFixed(1) + "m", 75, 100);
-}
-
-function drawBackground()
-{
-    fillCanvas(colors.BLACK);
-    setFillColor(colors.GRAY);
-    fillRectangle(0,FLOOR_LEVEL,width,height);
+    context.font='25px verdana';
+	setFillColor(colors.WHITE);	
+	context.fillText(score.toFixed(1) + "m", 50, 75);
 }
 
 // Body = physics object
@@ -168,6 +198,8 @@ class Player extends Body
     onCollision(other)
     {
         gamePaused = true;
+
+        
     }
 }
 
@@ -232,5 +264,45 @@ class Obstacle extends Body
     offScreen()
     {
         return (this.position.x + this.size.x <= 0);
+    }
+}
+
+class Parallax
+{
+    constructor(layers)
+    {
+        this.layers = layers;
+    }
+
+    drawLayers()
+    {
+        this.layers.forEach(layer => {
+            layer.velocity.x -= gameSpeed/1000;
+
+            layer.sprite.drawSelf();
+            
+            layer.position.x += layer.sprite.size.x;
+            layer.sprite.drawSelf();
+            layer.position.x -= layer.sprite.size.x;
+
+            layer.position.addVec(layer.velocity);
+
+            if(layer.position.x < -layer.sprite.size.x)
+            {
+                layer.position.x = 0;
+            }
+        });
+    }
+}
+
+class ParallaxLayer
+{
+    constructor(sprite, vecVelocity)
+    {
+        this.sprite = sprite;
+        this.position = Vector.zero;
+        this.velocity = vecVelocity;
+
+        this.sprite.position = this.position;
     }
 }
