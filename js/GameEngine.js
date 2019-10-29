@@ -11,7 +11,7 @@
  
     function load()
     {
-        // used to load files
+        // used to load objects
     }
 
     function setup()
@@ -35,11 +35,25 @@
     }
 */
 
+let objectsLoading = 0;
+let gamePaused = false;
+let FRAME_COUNT = 0;
+
 window.onload = function()
 {
-	if (typeof load === "function") { 
+    if (typeof load === "function") { 
 		load();
-	}
+    }
+
+    waitForLoading();
+}
+
+async function waitForLoading() 
+{
+    while(objectsLoading > 0)
+    {
+        await sleep(1);
+    }
 
     canvas = document.getElementById("game");
     context = canvas.getContext('2d');    
@@ -49,14 +63,14 @@ window.onload = function()
     centerX = width/2;
     centerY = height/2;
 
-    gamePaused = false;
-	
     if (typeof setup === "function") { 
 		setup();
 	}
 
     let date = new Date();
     gameLoop(date.getTime());
+
+
 }
 
 function gameLoop(startTime)
@@ -73,6 +87,8 @@ function gameLoop(startTime)
 	if (typeof draw === "function") { 
 		draw();
     }
+
+    FRAME_COUNT++;
     
     requestAnimationFrame(function(){
         if(gamePaused)
@@ -128,3 +144,9 @@ function setCanvasHeight(h)
     height = h;
     centerY = height/2;
 }
+
+// https://stackoverflow.com/questions/951021/what-is-the-javascript-version-of-sleep
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+

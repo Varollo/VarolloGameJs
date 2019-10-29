@@ -54,6 +54,7 @@ function physicsUpdate(deltaTime)
                             if (other != body && body.collider.collides(other.collider))
                             {          
                                 body.onCollision(other);
+                                other.onCollision(body);
                             }
                         }
                     }
@@ -91,11 +92,6 @@ class Body
 
     updateSelf(deltaTime)
     {
-        if(this.collider != undefined)
-        {
-            this.collider.position = this.position;
-        }
-
         if(this.isStatic) return;
 
         if(this.affectedByGravity)
@@ -128,9 +124,9 @@ class Body
 
 class Collider
 {
-    constructor(x,y)
+    constructor(vecPosition)
     {
-        this.position = new Vector(x,y);        
+        this.position = vecPosition;        
     }
 
     collides(other)
@@ -141,11 +137,10 @@ class Collider
 
 class RectCollider extends Collider
 {
-    constructor(x,y,w,h)
+    constructor(vecPosition,vecSize)
     {
-        super(x,y);
-        this.w = w;
-        this.h = h;
+        super(vecPosition);
+        this.size = vecSize;
 
         this.colliderType = 1;
     }
@@ -156,18 +151,18 @@ class RectCollider extends Collider
         {
             case 1: // rectangle x rectangle collision
                 
-                return (pointInRectangle(other.position.x, other.position.y, this.position.x, this.position.y, this.w, this.h)
-                     || pointInRectangle(other.position.x + other.w, other.position.y + other.h, this.position.x, this.position.y, this.w, this.h)
-                     || pointInRectangle(other.position.x + other.w, other.position.y, this.position.x, this.position.y, this.w, this.h)
-                     || pointInRectangle(other.position.x, other.position.y + other.h, this.position.x, this.position.y, this.w, this.h))
+                return (pointInRectangle(other.position.x, other.position.y, this.position.x, this.position.y, this.size.x, this.size.y)
+                     || pointInRectangle(other.position.x + other.size.x, other.position.y + other.size.y, this.position.x, this.position.y, this.size.x, this.size.y)
+                     || pointInRectangle(other.position.x + other.size.x, other.position.y, this.position.x, this.position.y, this.size.x, this.size.y)
+                     || pointInRectangle(other.position.x, other.position.y + other.size.y, this.position.x, this.position.y, this.size.x, this.size.y))
 
             case 2:// rectangle x circle collision
             
-            return (pointInRectangle(other.position.x, other.position.y, this.position.x, this.position.y, this.w, this.h)
+            return (pointInRectangle(other.position.x, other.position.y, this.position.x, this.position.y, this.size.x, this.size.y)
                  || pointInCircle(this.position.x, this.position.y, other.position.x, other.position.y, other.r)
-                 || pointInCircle(this.position.x + this.position.w, this.position.y + this.position.h, other.position.x, other.position.y, other.r)
-                 || pointInCircle(this.position.x + this.position.w, this.position.y, other.position.x, other.position.y, other.r)
-                 || pointInCircle(this.position.x, this.position.y + this.position.h, other.position.x, other.position.y, other.r))
+                 || pointInCircle(this.position.x + this.size.w, this.position.y + this.size.h, other.position.x, other.position.y, other.r)
+                 || pointInCircle(this.position.x + this.size.w, this.position.y, other.position.x, other.position.y, other.r)
+                 || pointInCircle(this.position.x, this.position.y + this.size.h, other.position.x, other.position.y, other.r))
                 
         }
     }
@@ -175,7 +170,7 @@ class RectCollider extends Collider
 
 class CircleCollider extends Collider
 {
-    constructor(x,y,r)
+    constructor(vecPosition,objR)
     {
         super(x,y);
         this.r = r;
@@ -189,11 +184,11 @@ class CircleCollider extends Collider
         {
             case 1: // circle x rectangle collision
             
-                return (pointInRectangle(this.position.x, this.position.y, other.position.x, other.position.y, other.w + other.position.x, other.h + other.position.y)
+                return (pointInRectangle(this.position.x, this.position.y, other.position.x, other.position.y, other.size.x + other.position.x, other.size.y + other.position.y)
                      || pointInCircle(other.position.x, other.position.y, this.position.x, this.position.y, this.r)
-                     || pointInCircle(other.position.x + other.position.w, other.position.y + other.position.h, this.position.x, this.position.y, this.r)
-                     || pointInCircle(other.position.x + other.position.w, other.position.y, this.position.x, this.position.y, this.r)
-                     || pointInCircle(other.position.x, other.position.y + other.position.h, this.position.x, this.position.y, this.r))
+                     || pointInCircle(other.position.x + other.size.w, other.position.y + other.size.h, this.position.x, this.position.y, this.r)
+                     || pointInCircle(other.position.x + other.size.w, other.position.y, this.position.x, this.position.y, this.r)
+                     || pointInCircle(other.position.x, other.position.y + other.size.h, this.position.x, this.position.y, this.r))
             
             case 2: // circle x circle collision
 

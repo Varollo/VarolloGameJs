@@ -64,6 +64,16 @@ function colorToString(color)
     return colorMode+"("+color.r+","+color.g+","+color.b+","+color.a+")";
 }
 
+function setFillColor(color)
+{
+    context.fillStyle = color.getString();
+}
+
+function setStrokeColor(color)
+{
+    context.strokeStyle = color.getString();
+}
+
 const colors = 
 {
     WHITE: new Color(255,255,255),

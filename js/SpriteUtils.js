@@ -1,6 +1,22 @@
-function SetAntiAliasing(state)
+function setAntiAliasing(state)
 {
     context.imageSmoothingEnabled = state;
+}
+
+class Texture extends Image
+{
+    constructor(src,width,height)
+    {
+        super(width, height);  
+        this.src = src;
+
+        objectsLoading++;
+
+        this.onload = function()
+        {
+            objectsLoading--;
+        };
+    }
 }
 
 /*
@@ -12,24 +28,23 @@ function SetAntiAliasing(state)
 */
 class Sprite
 {
-    constructor(src, vecPosition, vecSize)
+    constructor(texture, vecPosition, vecSize, onloadCallback)
     {
         this.position = vecPosition;
         this.size = vecSize;
 
-        this.image = new Image();
-        this.image.src = src;
-        
+        this.sourceTexture = texture;
+
         this.clippingX = 0;
         this.clippingY = 0;
-        this.clippingW = this.image.width;
-        this.clippingH = this.image.height;
+        this.clippingW = this.sourceTexture.width;
+        this.clippingH = this.sourceTexture.height;
     }
 
     drawSelf()
     {
         context.drawImage(
-            this.image,
+            this.sourceTexture,
             this.clippingX,  this.clippingY,
             this.clippingW,  this.clippingH,
             this.position.x, this.position.y,
