@@ -8,6 +8,7 @@ function load()
     character_tex = new Texture("img/example 02/character_spritesheet.png");
     obstacles_tex = new Texture("img/example 02/forest_enemies_spritesheet.png");
     background_tex = new Texture("img/example 02/forest_background .png");
+    vfx_tex = new Texture("img/example 02/visual_effects.png");
 }
 
 function setup()
@@ -16,6 +17,9 @@ function setup()
     setCanvasSize(500, 500);
     setAntiAliasing(false);
     GRAVITY = new Vector(0,3);
+
+    // defining the visual effects layer
+    vfx = new Sprite(vfx_tex, Vector.zero, new Vector(width, height));
 
     // defining the background
     let bg_layer_0 = new Sprite(background_tex, Vector.zero, new Vector(width, height));
@@ -29,9 +33,9 @@ function setup()
     
     background = new Parallax
     ([
-            new ParallaxLayer(bg_layer_0, new Vector(-1,0)),
-            new ParallaxLayer(bg_layer_1, new Vector(-3,0)),
-            new ParallaxLayer(bg_layer_2, new Vector(-8,0))
+            new ParallaxLayer(bg_layer_0, new Vector(0,0)),
+            new ParallaxLayer(bg_layer_1, new Vector(0,0)),
+            new ParallaxLayer(bg_layer_2, new Vector(0,0))
     ]);
 
     // defining the player
@@ -64,6 +68,12 @@ function setup()
     obstacle2.affectedByGravity = false;
 }
 
+function fixedUpdate()
+{
+    if(typeof background != "undefined")
+        background.updateSelf();
+}
+
 function update(deltaTime)
 {
     score += gameSpeed * deltaTime * 0.1;
@@ -86,6 +96,8 @@ function draw()
     obstacle.drawSelf();
     obstacle2.drawSelf();
 
+    vfx.drawSelf();
+
     drawScore();
 }
 
@@ -105,12 +117,12 @@ function onPauseGame()
 
         context.font='15px Arial';
         setFillColor(colors.GRAY);	
-        context.fillText("PRESS [SPACE] TO RETRY", 160, centerY+25);
+        context.fillText("PRESS [ R ] TO RETRY", 175, centerY+25);
 
         countValue++;
     }    
 
-    if(keys.SPACE.pressed)
+    if(keys.R.pressed)
     {
         location.reload();        
     }
@@ -274,23 +286,31 @@ class Parallax
         this.layers = layers;
     }
 
+    updateSelf()
+    {
+        for(let i = 0; i < this.layers.length; i++)
+        {
+            this.layers[i].velocity.x = -gameSpeed / (this.layers.length-i);
+
+            this.layers[i].position.addVec(this.layers[i].velocity);
+    
+            if(this.layers[i].position.x < -this.layers[i].sprite.size.x)
+            {
+                this.layers[i].position.x = 0;
+            }
+        }        
+    }
+
     drawLayers()
     {
-        this.layers.forEach(layer => {
-            layer.velocity.x -= gameSpeed/1000;
+        this.layers.forEach(layer => {          
 
             layer.sprite.drawSelf();
             
             layer.position.x += layer.sprite.size.x;
             layer.sprite.drawSelf();
             layer.position.x -= layer.sprite.size.x;
-
-            layer.position.addVec(layer.velocity);
-
-            if(layer.position.x < -layer.sprite.size.x)
-            {
-                layer.position.x = 0;
-            }
+            
         });
     }
 }
