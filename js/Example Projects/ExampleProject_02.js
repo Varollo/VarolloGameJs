@@ -2,6 +2,11 @@ const FLOOR_LEVEL = 400;
 let score = 0;
 let gameSpeed = 10;
 
+let nParticles = 50;
+let particles = [];
+
+let scene = 0;
+
 function load()
 {
     // used to load objects
@@ -9,6 +14,11 @@ function load()
     obstacles_tex = new Texture("img/example 02/forest_enemies_spritesheet.png");
     background_tex = new Texture("img/example 02/forest_background .png");
     vfx_tex = new Texture("img/example 02/visual_effects.png");
+	particles_tex = new Texture("img/example 02/forest_particles.png");
+	
+	hit_sound = new Sound("audio/example 02/hit.wav");
+	jump_sound = new Sound("audio/example 02/jump.wav");
+	music_sound = new Sound("audio/example 02/music.wav");
 }
 
 function setup()
@@ -39,7 +49,7 @@ function setup()
     ]);
 
     // defining the player
-    player = new Player(100, 400, 50, 80);
+    player = new Player(-100, FLOOR_LEVEL - 80, 50, 80);
     player.sprite = new Array(2);
 
     player.sprite[0] = new Sprite(character_tex,player.position,player.size);
@@ -66,22 +76,51 @@ function setup()
     obstacle2.sprite[0].setClippingValues(32,0,12,3);
 
     obstacle2.affectedByGravity = false;
+    
+    for(let i = 0; i < nParticles; i++)
+	{
+		let size = random(10,30);
+		particles[i] = new Particle(random(0,width), random(-height, height), size, size);
+    }  
 }
 
-function fixedUpdate()
+function fixedUpdate(deltaTime)
 {
     if(typeof background != "undefined")
         background.updateSelf();
+
+    if(scene === 2)
+    {
+        player.updateSelf(deltaTime);
+        obstacle.updateSelf(deltaTime);
+        obstacle2.updateSelf(deltaTime);
+    }
 }
 
 function update(deltaTime)
 {
-    score += gameSpeed * deltaTime * 0.1;
-
-    if(gameSpeed < 30)
+    switch(scene)
     {
-        gameSpeed+= deltaTime * 0.5;
-    }    
+        case 0:
+            player.position.x+=0.5;
+            if(player.position.x > 100 || keys.ANY_KEY.pressed)
+            {
+                player.position.x = 100;
+                scene++;
+            }
+            break;
+
+        case 2:
+            score += gameSpeed * deltaTime * 0.1;
+
+            if(gameSpeed < 30)
+            {
+                gameSpeed+= deltaTime * 0.5;
+            }   
+            break;
+    }
+
+     
 }
 
 function draw()
@@ -90,15 +129,42 @@ function draw()
     background.drawLayers();
 
     // drawing the player
-    player.drawSelf();
+	if(!gamePaused)
+		player.drawSelf();
 
     // drawing the obstacle
     obstacle.drawSelf();
     obstacle2.drawSelf();
+	
+	for(let i = 0; i < nParticles; i++)
+	{
+		particles[i].drawSelf();
+	}
 
     vfx.drawSelf();
 
-    drawScore();
+    switch(scene)
+    {
+        case 1:
+            drawTitleScreen()
+            break;
+        case 2:
+            drawScore();
+            break;
+    }
+    
+}
+
+function drawTitleScreen() {
+    fillCanvas(new Color(0, 0, 0, 0.25));
+
+    context.font = '40px Arial Black';
+    setFillColor(colors.WHITE);
+    context.fillText("SUPER FOREST RUN", 25, centerY - 75);
+
+    context.font = '30px Arial';
+    setFillColor(colors.GRAY);
+    context.fillText("PRESS ANY KEY TO START", 50, centerY - 15);
 }
 
 let countValue = 0;
@@ -131,9 +197,17 @@ function onPauseGame()
 function keyPressed(key)
 {
     // called when a key is pressed
-    if(key === keys.SPACE)
+    if(key === keys.SPACE && scene === 2 && !gamePaused)
     {
         player.jump();
+    }
+
+    if(scene === 1)
+    {
+        playingMusic = true;
+        music_sound.volume = 0.5;
+        music_sound.play(true); 
+        scene++;
     }
 }
 
@@ -144,12 +218,25 @@ function drawScore()
 	context.fillText(score.toFixed(1) + "m", 50, 75);
 }
 
+async function playerDied()
+{
+	gamePaused = true;
+	hit_sound.play();
+    music_sound.stop();
+	
+	fillCanvas(colors.WHITE);
+	await sleep(50);	
+	draw();
+}
+
 // Body = physics object
 class Player extends Body
 {
     constructor(x,y,w,h)
     {
         super();
+
+        this.autoUpdate = false;
 
         this.sprite = undefined;
         this.animationIndex = 0;
@@ -168,6 +255,7 @@ class Player extends Body
     {
         if(this.onGround())
         {
+			jump_sound.play();
             this.addForce(new Vector(0,-this.jumpForce));
         }
     }
@@ -209,9 +297,7 @@ class Player extends Body
 
     onCollision(other)
     {
-        gamePaused = true;
-
-        
+        playerDied();
     }
 }
 
@@ -220,6 +306,8 @@ class Obstacle extends Body
     constructor(x,y,w,h)
     {
         super();
+
+        this.autoUpdate = false;
 
         this.sprite = undefined;
         this.animationIndex = 0;
@@ -325,4 +413,45 @@ class ParallaxLayer
 
         this.sprite.position = this.position;
     }
+}
+
+class Particle extends Body
+{
+	constructor(x, y, w, h)
+	{
+		super();
+		
+		this.position.x = x;
+		this.position.y = y;
+		
+		this.size = new Vector(w,h);
+		
+		this.affectedByGravity = false;
+		
+		this.velocity.x = - 10;
+		
+		this.sprite = new Sprite(particles_tex, this.position, this.size);
+	}
+	
+	updateSelf(deltaTime)
+	{
+		this.velocity.x = -10-gameSpeed;
+		super.updateSelf(deltaTime);
+		this.position.y += this.size.x/20;
+		
+		if(this.position.x < -this.size.x)
+		{
+			this.position.x = width + random(0,this.size.x*5);
+		}
+		
+		if(this.position.y > height + this.size.y)
+		{
+			this.position.y = random(-height, -this.size.y);
+		}
+	}
+	
+	drawSelf()
+	{
+		this.sprite.drawSelf();
+	}
 }

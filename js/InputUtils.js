@@ -431,14 +431,15 @@ addEventListener("keydown", function(e)
     {
         if (keys[key[i]].code == e.keyCode)
         {
+            keys.ANY_KEY.pressed = true;  
+            
             if (typeof keyPressed === "function"
             && keys[key[i]].pressed == false) { 
                 keyPressed(keys[key[i]]);
             }
-
-            keys[key[i]].pressed = true;
-            keys.ANY_KEY.pressed = true;            
             
+            keys[key[i]].pressed = true;
+
             break;
         }
     }
@@ -451,13 +452,14 @@ addEventListener("keyup", function(e)
     {
         if (keys[key[i]].code == e.keyCode)
         {
+            keys.ANY_KEY.pressed = false;
+
             if (typeof keyReleased === "function"
             && keys[key[i]].pressed == true) { 
                 keyReleased(keys[key[i]]);
             }
 
             keys[key[i]].pressed = false;
-            keys.ANY_KEY.pressed = false;
 
             break;
         }

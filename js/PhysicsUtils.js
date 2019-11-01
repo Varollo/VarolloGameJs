@@ -5,7 +5,7 @@
 
  * FUNCTIONS TO BE USED
 
-    function fixedUpdate()
+    function fixedUpdate(deltaTime)
     {
         // called once per every 'FIXED_DELTA_TIME' miliseconds (default = 20)
     }
@@ -60,13 +60,13 @@ function physicsUpdate(deltaTime)
                     }
                 });
             }
-
-            body.updateSelf(deltaTime);
+            if(body.autoUpdate)
+                body.updateSelf(deltaTime);
         });
     }
 
     if(typeof fixedUpdate === 'function') {
-        fixedUpdate();
+        fixedUpdate(FIXED_DELTA_TIME);
     }
 }
 
@@ -78,8 +78,11 @@ class Body
         this.velocity          = Vector.zero;
         this.acceleration      = Vector.zero;
 
+        this.autoUpdate = true;
+
         this.mass = 1;
         this.bounciness = 1;
+		this.gravityMultiplier = 1;
 
         this.isStatic          = false;
         this.isKinematic       = false;
@@ -96,7 +99,7 @@ class Body
 
         if(this.affectedByGravity)
         {
-            this.velocity.addVec(GRAVITY);
+            this.velocity.addVec(Vector.sMult(GRAVITY,this.gravityMultiplier));
         }
 
         this.velocity.addVec(this.acceleration);
