@@ -80,4 +80,7 @@ const colors =
     BLACK: new Color(0,0,0),
     GRAY: new Color(127,127,127),
     RED: new Color(255,0,0),
+    GREEN: new Color(0,255,0),
+    BLUE: new Color(0,0,255),
+    YELLOW: new Color(255,255,0)
 };

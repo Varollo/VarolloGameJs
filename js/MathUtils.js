@@ -219,7 +219,7 @@ class Vector
  * RETORNA UM NUMERO ALEATORIO
  * min, max
 */
-function random(){
+function randomValue(){
 	return Math.random();
 }
 function random(min,max){

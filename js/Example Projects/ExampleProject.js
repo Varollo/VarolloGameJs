@@ -10,15 +10,15 @@ let scene = 0;
 function load()
 {
     // used to load objects
-    character_tex = new Texture("img/example 02/character_spritesheet.png");
-    obstacles_tex = new Texture("img/example 02/forest_enemies_spritesheet.png");
-    background_tex = new Texture("img/example 02/forest_background .png");
-    vfx_tex = new Texture("img/example 02/visual_effects.png");
-	particles_tex = new Texture("img/example 02/forest_particles.png");
+    character_tex = new Texture("img/example/character_spritesheet.png");
+    obstacles_tex = new Texture("img/example/forest_enemies_spritesheet.png");
+    background_tex = new Texture("img/example/forest_background .png");
+    vfx_tex = new Texture("img/example/visual_effects.png");
+	particles_tex = new Texture("img/example/forest_particles.png");
 	
-	hit_sound = new Sound("audio/example 02/hit.wav");
-	jump_sound = new Sound("audio/example 02/jump.wav");
-	music_sound = new Sound("audio/example 02/music.wav");
+	hit_sound = new Sound("audio/example/hit.wav");
+	jump_sound = new Sound("audio/example/jump.wav");
+	music_sound = new Sound("audio/example/music.wav");
 }
 
 function setup()

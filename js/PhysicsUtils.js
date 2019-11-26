@@ -16,6 +16,19 @@ FIXED_DELTA_TIME = 20;
 
 bodyStack = [];
 
+function DestroyBody(body)
+{
+    for(let i = 0; i < bodyStack.length; i++)
+    {
+        if(bodyStack[i] == body)
+        {
+            bodyStack[i].onDestroy();
+            bodyStack.splice(i,1);
+            break;
+        }
+    }
+}
+
 setInterval(physicsUpdate,FIXED_DELTA_TIME);
 function physicsUpdate(deltaTime)
 {
@@ -72,11 +85,14 @@ function physicsUpdate(deltaTime)
 
 class Body
 {   
-    constructor()
+    constructor(tag)
     {
         this.position          = Vector.zero;
         this.velocity          = Vector.zero;
         this.acceleration      = Vector.zero;
+
+        if(tag == undefined) this.tag = "body";
+        else this.tag = tag;
 
         this.autoUpdate = true;
 
@@ -122,6 +138,11 @@ class Body
     {
         // called when colliding with something
         // (if it has a collider) 
+    }
+
+    onDestroy()
+    {
+        // called when the object is removed from the bodyStack
     }
 }
 
@@ -175,8 +196,8 @@ class CircleCollider extends Collider
 {
     constructor(vecPosition,objR)
     {
-        super(x,y);
-        this.r = r;
+        super(vecPosition);
+        this.r = objR;
 
         this.colliderType = 2;
     }
@@ -188,14 +209,14 @@ class CircleCollider extends Collider
             case 1: // circle x rectangle collision
             
                 return (pointInRectangle(this.position.x, this.position.y, other.position.x, other.position.y, other.size.x + other.position.x, other.size.y + other.position.y)
-                     || pointInCircle(other.position.x, other.position.y, this.position.x, this.position.y, this.r)
-                     || pointInCircle(other.position.x + other.size.w, other.position.y + other.size.h, this.position.x, this.position.y, this.r)
-                     || pointInCircle(other.position.x + other.size.w, other.position.y, this.position.x, this.position.y, this.r)
-                     || pointInCircle(other.position.x, other.position.y + other.size.h, this.position.x, this.position.y, this.r))
+                     || pointInCircle(other.position.x, other.position.y, this.position.x, this.position.y, this.r.value)
+                     || pointInCircle(other.position.x + other.size.w, other.position.y + other.size.h, this.position.x, this.position.y, this.r.value)
+                     || pointInCircle(other.position.x + other.size.w, other.position.y, this.position.x, this.position.y, this.r.value)
+                     || pointInCircle(other.position.x, other.position.y + other.size.h, this.position.x, this.position.y, this.r.value))
             
             case 2: // circle x circle collision
 
-                let sumR = this.r + other.r;
+                let sumR = this.r.value + other.r.value;
                 let dis = distance(this.position.x,this.position.y,other.position.x,other.position.y);
                 return (sumR >= dis);
         }

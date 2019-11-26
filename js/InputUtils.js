@@ -10,6 +10,21 @@
     {
         // called when a key is released
     }
+
+    function mousePressed(x, y)
+    {
+        // called when the mouse is pressed
+    }
+
+    function mouseReleased(x, y)
+    {
+        // called when the mouse is released
+    }
+
+    function mouseMoved(x, y)
+    {
+        // called when the mouse moved
+    }
 */
 
 /* KEYS FOUND HERE:
@@ -424,6 +439,13 @@ const keys =
 		},
     };
 
+const mouse = 
+{
+    x: 0,
+    y: 0,
+    pressed: false
+};
+
 addEventListener("keydown", function(e)
 {
     let key = Object.keys(keys);
@@ -463,5 +485,36 @@ addEventListener("keyup", function(e)
 
             break;
         }
+    }
+});
+
+addEventListener("mousedown", function(e)
+{
+    if(typeof mousePressed === "function"
+    && mouse.pressed == false){
+        mousePressed(e.x, e.y);
+    }
+
+    mouse.pressed = true;
+});
+
+addEventListener("mouseup", function(e)
+{
+    if(typeof mouseReleased === "function"
+    && mouse.pressed == true){
+        mouseReleased(e.x, e.y);
+    }
+
+    mouse.pressed = false;
+});
+
+addEventListener("mousemove", function(e)
+{
+    mouse.x = e.x;
+    mouse.y = e.y;
+
+    if(typeof mouseMoved === "function")
+    {
+        mouseMoved(e.x, e.y);
     }
 });
