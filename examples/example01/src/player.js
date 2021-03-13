@@ -3,8 +3,6 @@ class Player extends Body {
     constructor(x, y, w, h) {
         super();
 
-        this.autoUpdate = false;
-
         this.sprite = undefined;
         this.animationIndex = 0;
 
@@ -15,7 +13,7 @@ class Player extends Body {
 
         this.jumpForce = 40;
 
-        this.setCollider(new RectCollider(this.position, this.size));
+        this.collider = new Rectangle(this.position.x, this.position.y, this.size.x, this.size.y);
     }
 
     jump() {
@@ -31,10 +29,10 @@ class Player extends Body {
             fillRectangle(this.position.x, this.position.y, this.size.x, this.size.y, drawMode.TOP_LEFT);
         }
         else if (!this.onGround()) {
-            this.sprite[0].drawSelf();
+            this.sprite[0].drawSelf(this.position.x, this.position.y, this.size.x, this.size.y);
         }
         else {
-            this.sprite[this.animationIndex % this.sprite.length].drawSelf();
+            this.sprite[this.animationIndex % this.sprite.length].drawSelf(this.position.x, this.position.y, this.size.x, this.size.y);
             if (FRAME_COUNT % Math.floor(30 - gameSpeed) === 0)
                 this.animationIndex++;
         }
@@ -47,13 +45,11 @@ class Player extends Body {
             this.velocity.y = 0;
             this.position.y = FLOOR_LEVEL - this.size.y;
         }
+
+        this.collider = new Rectangle(this.position.x, this.position.y, this.size.x, this.size.y);
     }
 
     onGround() {
         return (this.position.y + this.size.y >= FLOOR_LEVEL)
-    }
-
-    onCollision(other) {
-        playerDied();
     }
 }

@@ -2,8 +2,6 @@ class Obstacle extends Body {
     constructor(x, y, w, h) {
         super();
 
-        this.autoUpdate = false;
-
         this.sprite = undefined;
         this.animationIndex = 0;
 
@@ -12,7 +10,7 @@ class Obstacle extends Body {
 
         this.size = new Vector(w, h);
 
-        this.setCollider(new RectCollider(this.position, this.size));
+        this.collider = new Rectangle(this.position.x, this.position.y, this.size.x, this.size.y);
     }
 
     updateSelf(deltaTime) {
@@ -29,6 +27,8 @@ class Obstacle extends Body {
             this.velocity.y = 0;
             this.position.y = FLOOR_LEVEL - this.size.y;
         }
+
+        this.collider = new Rectangle(this.position.x, this.position.y, this.size.x, this.size.y);
     }
 
     drawSelf() {
@@ -37,7 +37,7 @@ class Obstacle extends Body {
             fillRectangle(this.position.x, this.position.y, this.size.x, this.size.y, drawMode.TOP_LEFT);
         }
         else {
-            this.sprite[this.animationIndex % this.sprite.length].drawSelf();
+            this.sprite[this.animationIndex % this.sprite.length].drawSelf(this.position.x, this.position.y, this.size.x, this.size.y);
 
             if (FRAME_COUNT % 15 === 0)
                 this.animationIndex++;

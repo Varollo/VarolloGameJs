@@ -11,7 +11,7 @@ class Particle extends Body {
 
         this.velocity.x = - 10;
 
-        this.sprite = new Sprite(particles_tex, this.position, this.size);
+        this.sprite = new Sprite(particles_tex);
     }
 
     updateSelf(deltaTime) {
@@ -29,6 +29,6 @@ class Particle extends Body {
     }
 
     drawSelf() {
-        this.sprite.drawSelf();
+        this.sprite.drawSelf(this.position.x, this.position.y, this.size.x, this.size.y);
     }
 }

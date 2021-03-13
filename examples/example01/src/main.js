@@ -7,17 +7,19 @@ let particles = [];
 
 let scene = 0;
 
+let drawHitbox = false;
+
 function load() {
     // used to load objects
-    character_tex = new Texture("img/example/character_spritesheet.png");
-    obstacles_tex = new Texture("img/example/forest_enemies_spritesheet.png");
-    background_tex = new Texture("img/example/forest_background .png");
-    vfx_tex = new Texture("img/example/visual_effects.png");
-    particles_tex = new Texture("img/example/forest_particles.png");
+    character_tex = new Texture("img/character_spritesheet.png");
+    obstacles_tex = new Texture("img/forest_enemies_spritesheet.png");
+    background_tex = new Texture("img/forest_background.png");
+    vfx_tex = new Texture("img/visual_effects.png");
+    particles_tex = new Texture("img/forest_particles.png");
 
-    hit_sound = new Sound("audio/example/hit.wav");
-    jump_sound = new Sound("audio/example/jump.wav");
-    music_sound = new Sound("audio/example/music.wav");
+    hit_sound = new Sound("audio/hit.wav");
+    jump_sound = new Sound("audio/jump.wav");
+    music_sound = new Sound("audio/music.wav");
 }
 
 function setup() {
@@ -27,16 +29,16 @@ function setup() {
     GRAVITY = new Vector(0, 3);
 
     // defining the visual effects layer
-    vfx = new Sprite(vfx_tex, Vector.zero, new Vector(width, height));
+    vfx = new Sprite(vfx_tex);
 
     // defining the background
-    let bg_layer_0 = new Sprite(background_tex, Vector.zero, new Vector(width, height));
+    let bg_layer_0 = new Sprite(background_tex);
     bg_layer_0.setClippingValues(200, 0, 100, 100);
 
-    let bg_layer_1 = new Sprite(background_tex, Vector.zero, new Vector(width, height));
+    let bg_layer_1 = new Sprite(background_tex);
     bg_layer_1.setClippingValues(100, 0, 100, 100);
 
-    let bg_layer_2 = new Sprite(background_tex, Vector.zero, new Vector(width, height));
+    let bg_layer_2 = new Sprite(background_tex);
     bg_layer_2.setClippingValues(0, 0, 100, 100);
 
     background = new Parallax
@@ -50,27 +52,27 @@ function setup() {
     player = new Player(-100, FLOOR_LEVEL - 80, 50, 80);
     player.sprite = new Array(2);
 
-    player.sprite[0] = new Sprite(character_tex, player.position, player.size);
+    player.sprite[0] = new Sprite(character_tex);
     player.sprite[0].setClippingValues(0, 0, 10, 16);
 
-    player.sprite[1] = new Sprite(character_tex, player.position, player.size);
+    player.sprite[1] = new Sprite(character_tex);
     player.sprite[1].setClippingValues(15, 0, 10, 16);
 
     // defining the obstacle
     obstacle = new Obstacle(width, 450, 55, 80);
     obstacle.sprite = new Array(2);
 
-    obstacle.sprite[0] = new Sprite(obstacles_tex, obstacle.position, obstacle.size);
+    obstacle.sprite[0] = new Sprite(obstacles_tex);
     obstacle.sprite[0].setClippingValues(0, 0, 11, 16);
 
-    obstacle.sprite[1] = new Sprite(obstacles_tex, obstacle.position, obstacle.size);
+    obstacle.sprite[1] = new Sprite(obstacles_tex);
     obstacle.sprite[1].setClippingValues(16, 0, 11, 16);
 
     // defining the flying obstacle
     obstacle2 = new Obstacle(width + 1000, FLOOR_LEVEL - 141, 60, 15);
     obstacle2.sprite = new Array(1);
 
-    obstacle2.sprite[0] = new Sprite(obstacles_tex, obstacle2.position, obstacle2.size);
+    obstacle2.sprite[0] = new Sprite(obstacles_tex);
     obstacle2.sprite[0].setClippingValues(32, 0, 12, 3);
 
     obstacle2.affectedByGravity = false;
@@ -81,21 +83,10 @@ function setup() {
     }
 }
 
-function fixedUpdate(deltaTime) {
-    if (typeof background != "undefined")
-        background.updateSelf();
-
-    if (scene === 2) {
-        player.updateSelf(deltaTime);
-        obstacle.updateSelf(deltaTime);
-        obstacle2.updateSelf(deltaTime);
-    }
-}
-
 function update(deltaTime) {
     switch (scene) {
         case 0:
-            player.position.x += 0.5;
+            player.position.x += 1.5;
             if (player.position.x > 100 || keys.ANY_KEY.pressed) {
                 player.position.x = 100;
                 scene++;
@@ -105,12 +96,24 @@ function update(deltaTime) {
         case 2:
             score += gameSpeed * deltaTime * 0.1;
 
+            if (typeof background != "undefined")
+                background.updateSelf();
+
+            player.updateSelf(deltaTime);
+            obstacle.updateSelf(deltaTime);
+            obstacle2.updateSelf(deltaTime);
+
             if (gameSpeed < 30) {
                 gameSpeed += deltaTime * 0.5;
             }
+
+            checkCollision();
             break;
     }
 
+    particles.forEach(particle => {
+        particle.updateSelf(deltaTime);
+    });
 
 }
 
@@ -130,7 +133,15 @@ function draw() {
         particles[i].drawSelf();
     }
 
-    vfx.drawSelf();
+    vfx.drawSelf(0, 0, width, height);
+
+    // DEBUG
+    if (drawHitbox) {
+        setStrokeColor(Color.RED)
+        strokeRectangle(player.collider.x, player.collider.y, player.collider.w, player.collider.h, drawMode.TOP_LEFT)
+        strokeRectangle(obstacle.collider.x, obstacle.collider.y, obstacle.collider.w, obstacle.collider.h, drawMode.TOP_LEFT)
+        strokeRectangle(obstacle2.collider.x, obstacle2.collider.y, obstacle2.collider.w, obstacle2.collider.h, drawMode.TOP_LEFT)
+    }
 
     switch (scene) {
         case 1:
@@ -141,6 +152,12 @@ function draw() {
             break;
     }
 
+}
+
+function checkCollision() {
+    if (player.collider.intersects(obstacle.collider) || player.collider.intersects(obstacle2.collider)) {
+        playerDied();
+    }
 }
 
 function drawTitleScreen() {
@@ -200,6 +217,8 @@ function drawScore() {
 }
 
 async function playerDied() {
+    if (gamePaused) return;
+
     gamePaused = true;
     hit_sound.play();
     music_sound.stop();
